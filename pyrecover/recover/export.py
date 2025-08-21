@@ -8,7 +8,7 @@ from ..fs.ntfs.mft import iter_mft_records
 CHUNK = 4 * 1024 * 1024
 
 def export_record(image_path: str, record_id: int, out_path: str) -> None:
-    dev = DeviceWindows(r"\\.\D:")
+    dev = DeviceWindows(image_path)
     try:
         boot = parse_boot_sector(dev.read(0, 512))
         cluster_size = boot.cluster_size

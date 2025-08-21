@@ -24,19 +24,36 @@ class DeviceWindows:
             win32security.SE_RESTORE_NAME,
             win32security.SE_MANAGE_VOLUME_NAME
         ])
+        
+        # Xử lý path - hỗ trợ cả drive letter và raw device path
+        if len(path) == 2 and path[1] == ':':
+            # Nếu là drive letter như "C:", chuyển thành raw device path
+            device_path = "\\\\.\\" + path
+        elif path.startswith("\\\\.\\"):
+            # Đã là raw device path
+            device_path = path
+        else:
+            # Có thể là file path
+            device_path = path
+            
         access = win32con.GENERIC_READ
         share = (win32con.FILE_SHARE_READ |
                  win32con.FILE_SHARE_WRITE |
                  win32con.FILE_SHARE_DELETE)
-        self.handle = win32file.CreateFile(
-            path,
-            access,
-            share,
-            None,
-            win32con.OPEN_EXISTING,
-            win32con.FILE_ATTRIBUTE_NORMAL,  # tránh ràng buộc alignment
-            None
-        )
+        
+        try:
+            self.handle = win32file.CreateFile(
+                device_path,
+                access,
+                share,
+                None,
+                win32con.OPEN_EXISTING,
+                win32con.FILE_ATTRIBUTE_NORMAL,
+                None
+            )
+            self.path = device_path
+        except Exception as e:
+            raise IOError(f"Failed to open device {device_path}: {e}")
 
     def read(self, offset: int, size: int) -> bytes:
         # pywin32 SetFilePointer(handle, distance, moveMethod)

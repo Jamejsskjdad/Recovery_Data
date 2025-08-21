@@ -6,7 +6,7 @@ from ..fs.ntfs.mft import iter_mft_records, MftRecord
 
 
 def scan_deleted(image_path: str, path_filter: str | None = None, name_contains: str | None = None) -> List[Dict[str, Any]]:
-    dev = DeviceWindows(r"\\.\D:")
+    dev = DeviceWindows(image_path)
     try:
         boot = parse_boot_sector(dev.read(0, 512))
         results: List[Dict[str, Any]] = []
